@@ -38,10 +38,7 @@ public class RainbowScreen extends AbstractScreenHandler {
     
     @Override
     protected void setWindowHints() {
-<<<<<<< HEAD
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-=======
->>>>>>> c31071bda7160e5a4830d5aff594fadc1b2bb698
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     }
     
@@ -83,11 +80,8 @@ public class RainbowScreen extends AbstractScreenHandler {
             }
             if (g == 255) {
                 if (r != 0) { r--; break progress; }
-<<<<<<< HEAD
                 if (b != 255) { b++; break progress; }
-=======
                 b++; break progress;
->>>>>>> c31071bda7160e5a4830d5aff594fadc1b2bb698
             }
             if (b == 255) {
                 if (g != 0) { g--; break progress; }
