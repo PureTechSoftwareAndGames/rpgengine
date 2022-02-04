@@ -81,7 +81,7 @@ public class RainbowScreen extends AbstractScreenHandler {
             if (g == 255) {
                 if (r != 0) { r--; break progress; }
                 if (b != 255) { b++; break progress; }
-                b++; break progress;
+                if (b != 255) { b++; break progress; }
             }
             if (b == 255) {
                 if (g != 0) { g--; break progress; }
