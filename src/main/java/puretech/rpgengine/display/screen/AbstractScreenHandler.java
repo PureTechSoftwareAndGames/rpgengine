@@ -1,4 +1,4 @@
-package puretech.rpgengine.display;
+package puretech.rpgengine.display.screen;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
@@ -27,12 +27,7 @@ public abstract class AbstractScreenHandler {
     public void disp() {
         this.init();
         this.loop();
-    
-        glfwFreeCallbacks(this.window);
-        glfwDestroyWindow(this.window);
-    
-        glfwTerminate();
-        glfwSetErrorCallback(null).free();
+        this.cleanup();
     }
     
     /**
@@ -56,23 +51,27 @@ public abstract class AbstractScreenHandler {
     
         glfwMakeContextCurrent(this.window);
         glfwSwapInterval(this.vsync);
+    
+        GL.createCapabilities();
         
-        glfwShowWindow(window);
+        this.finishInit();
     }
     
-    protected void setGFLWerrCallback() { glfwSetErrorCallback(GLFWErrorCallback.createPrint(System.err)); }
-    protected void setWindowHints() {}
-    protected void setKeyCallback() {}
-    
-    abstract void setWindowPos();
+     protected void setGFLWerrCallback() { glfwSetErrorCallback(GLFWErrorCallback.createPrint(System.err)); }
+     protected void setWindowHints() {}
+     protected void setKeyCallback() {}
+     abstract void setWindowPos();
+    /**
+     * Super call should be the last statement when overriding
+     */
+     protected void finishInit() { glfwShowWindow(window); }
     
     /**
      * Brief init and render loop.
      */
     protected void loop() {
-        GL.createCapabilities();
-    
-        glClearColor(this.clearColor.getRed() / 255f, this.clearColor.getGreen() / 255f, this.clearColor.getBlue() / 255f, this.clearColor.getAlpha() / 255f);
+        
+        this.loopInit();
         
         while (!glfwWindowShouldClose(window)) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -85,7 +84,21 @@ public abstract class AbstractScreenHandler {
         }
     }
     
+    /**
+     * Super call is optional when overriding, but recommended.
+     */
+    protected void loopInit() { glClearColor(this.clearColor.getRed() / 255f, this.clearColor.getGreen() / 255f, this.clearColor.getBlue() / 255f, this.clearColor.getAlpha() / 255f); }
     abstract void loopActions();
+    
+    
+    protected void cleanup() {
+        glfwFreeCallbacks(this.window);
+        glfwDestroyWindow(this.window);
+    
+        glfwTerminate();
+        glfwSetErrorCallback(null).free();
+    }
+    
     
     /**
      * Returns a window. Can be opened using {@link AbstractScreenHandler#disp()}
@@ -94,7 +107,7 @@ public abstract class AbstractScreenHandler {
      * @param monitor Monitor to display on. Use {@link MemoryUtil#NULL} for non-fullscreen, or pass in a monitor for fullscreen
      * @param share Share value. See the <a target="_blank" href="http://www.glfw.org/docs/latest/context.html#context_sharing">relevant GLFW documentation</a>.
      * @param clearColor Color for {@link GL11#glClearColor(float, float, float, float)} to be set to initially
-     * @param vsync Value for {@link org.lwjgl.glfw.GLFW#glfwSwapInterval(int)} to be set to intially
+     * @param vsync Value for {@link org.lwjgl.glfw.GLFW#glfwSwapInterval(int)} to be set to initially
      */
     public AbstractScreenHandler(CharSequence title, int[] dim, long monitor, long share, Color clearColor, int vsync) {
         if (dim.length != 2) throw new IllegalArgumentException("'dim' must be of length 2");

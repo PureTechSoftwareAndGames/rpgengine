@@ -1,9 +1,8 @@
-package puretech.rpgengine.display;
+package puretech.rpgengine.display.screen;
 
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import puretech.rpgengine.util.ScreenUtil;
 
 import java.awt.*;
 import java.nio.IntBuffer;
@@ -15,25 +14,25 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 
 
 public class RainbowScreen extends AbstractScreenHandler {
-    private boolean fullscreen;
+    private final boolean fullscreen;
     
     @Override
-    protected void init() {
-        super.init();
+    protected void finishInit() {
         if (fullscreen) {
             this.monitor = glfwGetPrimaryMonitor();
             try (MemoryStack stack = stackPush()) {
                 IntBuffer pWidth = stackMallocInt(1);
                 IntBuffer pHeight = stackMallocInt(1);
-        
+            
                 glfwGetMonitorWorkarea(monitor, null, null, pWidth, pHeight);
-        
+            
                 this.dim = new int[] { pWidth.get(0), pHeight.get(0) };
             } finally {
                 glfwSetWindowSize(this.window, this.dim[0], this.dim[1]);
                 glfwSetWindowMonitor(this.window, this.monitor,  0, 0, this.dim[0], this.dim[1], GLFW_DONT_CARE);
             }
         }
+        glfwShowWindow(window);
     }
     
     @Override
@@ -44,23 +43,12 @@ public class RainbowScreen extends AbstractScreenHandler {
     
     @Override
     protected void setKeyCallback() {
-        glfwSetKeyCallback(this.window, (window, key, scancode, action, mods) -> {
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) glfwSetWindowShouldClose(window, true);
-        });
+        ScreenUtil.escCloseScreen(this.window);
     }
     
     @Override
     protected void setWindowPos() {
-        try (MemoryStack stack = stackPush()) {
-            IntBuffer pWidth = stack.mallocInt(1);
-            IntBuffer pHeight = stack.mallocInt(1);
-        
-            glfwGetWindowSize(window, pWidth, pHeight);
-        
-            GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        
-            glfwSetWindowPos(window, ((vidMode.width() - pWidth.get(0)) / 2), (vidMode.height() - pHeight.get(0)) / 2);
-        }
+        ScreenUtil.centerWindowPos(this.window);
     }
     
     @Override
@@ -81,7 +69,6 @@ public class RainbowScreen extends AbstractScreenHandler {
             if (g == 255) {
                 if (r != 0) { r--; break progress; }
                 if (b != 255) { b++; break progress; }
-                if (b != 255) { b++; break progress; }
             }
             if (b == 255) {
                 if (g != 0) { g--; break progress; }
@@ -96,7 +83,7 @@ public class RainbowScreen extends AbstractScreenHandler {
      * @param title Title of the window
      * @param dim Dimensions of the window. Will be ignored if fullscreen == true
      * @param clearColor The clearColor to start with. The gradient will only apply if at least 1 component of the RGB is 255.
-     * @param fullscreen Wether or not to fullscreen onto {@link org.lwjgl.glfw.GLFW#glfwGetPrimaryMonitor()}
+     * @param fullscreen Whether to fullscreen onto {@link org.lwjgl.glfw.GLFW#glfwGetPrimaryMonitor()}
      */
     public RainbowScreen(CharSequence title, int[] dim, Color clearColor, boolean fullscreen) {
         super(title, dim, MemoryUtil.NULL, MemoryUtil.NULL, clearColor, 1);
